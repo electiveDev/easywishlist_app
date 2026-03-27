@@ -5,9 +5,16 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "astro preview"
+    "preview": "astro preview",
+    "format": "prettier --write ."
   },
   "dependencies": {
-    "astro": "^5.0.0"
+    "@astrojs/check": "^0.9.8",
+    "astro": "^5.0.0",
+    "typescript": "^5.9.3"
+  },
+  "devDependencies": {
+    "prettier": "^3.8.1",
+    "prettier-plugin-astro": "^0.14.1"
   }
 }

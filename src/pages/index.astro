@@ -1,194 +1,262 @@
 ---
 // Sim Report Extractor — fully client-side, no server rendering needed
 ---
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>EasyWishlist — Sim Report Extractor</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
-  <script is:inline>const whTooltips = { colorLinks: false, iconizeLinks: false, renameLinks: false };</script>
-  <script is:inline src="https://wow.zamimg.com/js/tooltips.js"></script>
-</head>
-<body>
 
-<!-- ── Header ──────────────────────────────────────────────────────────────── -->
-<header>
-  <div class="logo"><span class="easy">Easy</span>Wishlist</div>
-  <div class="logo-sep"></div>
-  <div class="header-subtitle">Sim Report Extractor</div>
-  <div class="header-right">
-    <a class="gh-link" href="https://github.com/AlvaroFalcon/easy_wishlist" target="_blank" rel="noopener">
-      <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
-        <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EasyWishlist — Sim Report Extractor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <script is:inline>
+      const whTooltips = {
+        colorLinks: false,
+        iconizeLinks: false,
+        renameLinks: false,
+      };
+    </script>
+    <script is:inline src="https://wow.zamimg.com/js/tooltips.js"></script>
+  </head>
+  <body>
+    <!-- ── Header ──────────────────────────────────────────────────────────────── -->
+    <header>
+      <div class="logo"><span class="easy">Easy</span>Wishlist</div>
+      <div class="logo-sep"></div>
+      <div class="header-subtitle">Sim Report Extractor</div>
+      <div class="header-right">
+        <a
+          class="gh-link"
+          href="https://github.com/frostfel702/easywishlist"
+          target="_blank"
+          rel="noopener"
+        >
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+            <path
+              d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38
           0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13
           -.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66
           .07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15
           -.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27
           .68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12
           .51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48
-          0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
-      </svg>
-      GitHub
-    </a>
-  </div>
-</header>
-
-<!-- ── Main ────────────────────────────────────────────────────────────────── -->
-<main>
-
-  <!-- Hero -->
-  <div class="hero">
-    <div class="hero-eyebrow">WoW Addon Tool</div>
-    <h1>Sim Report<br>Extractor</h1>
-    <p>Paste a <strong style="color:var(--text)">Raidbots</strong> or <strong style="color:var(--text)">Questionably Epic</strong> report URL and get a compact string ready to paste into EasyWishlist in-game.</p>
-  </div>
-
-  <!-- Steps -->
-  <div class="steps">
-    <div class="step">
-      <div class="step-num">1</div>
-      <div class="step-title">Run a Sim</div>
-      <p>Run a <a href="https://www.raidbots.com/simbot/droptimizer" target="_blank" rel="noopener">Droptimizer</a> on Raidbots or an upgrade report on <a href="https://questionablyepic.com" target="_blank" rel="noopener">Questionably Epic</a>.</p>
-    </div>
-    <div class="step">
-      <div class="step-num">2</div>
-      <div class="step-title">Copy the Report URL</div>
-      <p>Copy the report URL from your browser address bar.</p>
-    </div>
-    <div class="step">
-      <div class="step-num">3</div>
-      <div class="step-title">Import in WoW</div>
-      <p>Paste URL below, click Extract, then copy the output into <strong style="color:var(--text)">EasyWishlist &rarr; Import</strong>.</p>
-    </div>
-  </div>
-
-  <sim-extractor>
-
-  <!-- Input panel -->
-  <div class="panel">
-    <div class="panel-header">
-      <div class="panel-title">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
-          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
-        </svg>
-        Raidbots Report URL
-      </div>
-    </div>
-    <div class="panel-body">
-      <div class="url-row">
-        <input data-report-url type="url" class="url-input"
-          placeholder="https://www.raidbots.com/simbot/report/… or https://questionablyepic.com/live/upgradereport/…" />
-        <button class="btn btn-extract" data-extract-btn style="width:auto;margin-top:0;padding:0 22px;">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"
+            ></path>
           </svg>
-          Extract
-        </button>
+          GitHub
+        </a>
+      </div>
+    </header>
+
+    <!-- ── Main ────────────────────────────────────────────────────────────────── -->
+    <main>
+      <!-- Hero -->
+      <div class="hero">
+        <h1>Sim Report<br />Extractor</h1>
+        <p>
+          Paste a <strong style="color:var(--text)">Raidbots</strong> or <strong
+            style="color:var(--text)">Questionably Epic</strong
+          > report URL and get a compact string ready to paste into EasyWishlist in-game.
+        </p>
       </div>
 
-      <div class="error" data-error-box></div>
-
-      <!-- Manual fallback -->
-      <details class="manual-fallback" data-manual-fallback>
-        <summary>Or paste JSON manually</summary>
-        <textarea data-input-json placeholder="Paste your full Raidbots Droptimizer data.json here…&#10;&#10;The file can be several MB — that's expected." style="margin-top:12px"></textarea>
-      </details>
-    </div>
-  </div>
-
-  <!-- Output panel (hidden until extraction) -->
-  <div class="panel hidden" data-output-panel>
-    <div class="panel-header">
-      <div class="panel-title">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="20 6 9 17 4 12"/>
-        </svg>
-        Extracted Data
-      </div>
-    </div>
-    <div class="panel-body">
-
-      <!-- Stats -->
-      <div class="stats-row" data-stats-row></div>
-
-      <!-- Compact output -->
-      <div class="output-row">
-        <span class="output-label">Paste this string into <strong style="color:var(--text)">EasyWishlist &rarr; Import</strong> in-game</span>
-        <button class="btn btn-copy" data-copy-btn>Copy to Clipboard</button>
-      </div>
-      <textarea data-output-json readonly rows="3"></textarea>
-
-      <!-- Top items preview -->
-      <div class="ornament">
-        <div class="ornament-line"></div>
-        <div class="ornament-icon">&#9670; &#9670; &#9670;</div>
-        <div class="ornament-line"></div>
+      <!-- Steps -->
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-title">Run a Sim</div>
+          <p>
+            Run a <a
+              href="https://www.raidbots.com/simbot/droptimizer"
+              target="_blank"
+              rel="noopener">Droptimizer</a
+            > on Raidbots or an upgrade report on <a
+              href="https://questionablyepic.com"
+              target="_blank"
+              rel="noopener">Questionably Epic</a
+            >.
+          </p>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-title">Copy the Report URL</div>
+          <p>Copy the report URL from your browser address bar.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-title">Import in WoW</div>
+          <p>
+            Paste URL below, click Extract, then copy the output into <strong
+              style="color:var(--text)">EasyWishlist &rarr; Import</strong
+            >.
+          </p>
+        </div>
       </div>
 
-      <div class="preview-label">Top Upgrades Preview</div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Item ID</th>
-              <th>Slot</th>
-              <th>ilvl</th>
-              <th>Source</th>
-              <th>Upgrade</th>
-            </tr>
-          </thead>
-          <tbody data-preview-body></tbody>
-        </table>
-      </div>
+      <sim-extractor>
+        <!-- Input panel -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <svg
+                width="13"
+                height="13"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+              </svg>
+              Report URL
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="url-row">
+              <input
+                data-report-url
+                type="url"
+                class="url-input"
+                placeholder="https://www.raidbots.com/simbot/report/… or https://questionablyepic.com/live/upgradereport/…"
+              />
+              <button
+                class="btn btn-extract"
+                data-extract-btn
+                style="width:auto;margin-top:0;padding:0 22px;"
+              >
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                >
+                  <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"
+                  ></line>
+                </svg>
+                Extract
+              </button>
+            </div>
 
-    </div>
-  </div>
+            <div class="error" data-error-box></div>
+          </div>
+        </div>
 
-  </sim-extractor>
+        <!-- Output panel (hidden until extraction) -->
+        <div class="panel hidden" data-output-panel>
+          <div class="panel-header">
+            <div class="panel-title">
+              <svg
+                width="13"
+                height="13"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              Extracted Data
+            </div>
+          </div>
+          <div class="panel-body">
+            <!-- Stats -->
+            <div class="stats-row" data-stats-row></div>
 
-</main>
+            <!-- Compact output -->
+            <div class="output-row">
+              <span class="output-label"
+                >Paste this string into <strong style="color:var(--text)"
+                  >EasyWishlist &rarr; Import</strong
+                > in-game</span
+              >
+              <button class="btn btn-copy" data-copy-btn>Copy to Clipboard</button>
+            </div>
+            <textarea data-output-json readonly rows="3"></textarea>
 
-<!-- ── Footer ──────────────────────────────────────────────────────────────── -->
-<footer>
-  <p>EasyWishlist &mdash; WoW Addon &mdash; <a href="https://github.com/AlvaroFalcon/easy_wishlist" target="_blank" rel="noopener">GitHub</a></p>
-  <p style="margin-top:6px; font-size:11px; opacity:0.5;">All processing happens locally in your browser. Nothing is uploaded.</p>
-</footer>
+            <!-- Top items preview -->
+            <div class="ornament">
+              <div class="ornament-line"></div>
+              <div class="ornament-icon">&#9670; &#9670; &#9670;</div>
+              <div class="ornament-line"></div>
+            </div>
 
-<script>
-  import '../scripts/main';
-</script>
+            <div class="preview-label">Top Upgrades Preview</div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Item ID</th>
+                    <th>Slot</th>
+                    <th>ilvl</th>
+                    <th>Source</th>
+                    <th>Upgrade</th>
+                  </tr>
+                </thead>
+                <tbody data-preview-body></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </sim-extractor>
+    </main>
 
-</body>
+    <!-- ── Footer ──────────────────────────────────────────────────────────────── -->
+    <footer>
+      <p>
+        EasyWishlist &mdash; WoW Addon &mdash; <a
+          href="https://github.com/frostfel702/easywishlist"
+          target="_blank"
+          rel="noopener">GitHub</a
+        >
+      </p>
+      <p style="margin-top:6px; font-size:11px; opacity:0.5;">
+        All processing happens locally in your browser. Nothing is uploaded.
+      </p>
+    </footer>
+
+    <script>
+      import '../scripts/main';
+    </script>
+  </body>
 </html>
 
 <style is:global>
   /* ── Variables ──────────────────────────────────────────────────────── */
   :root {
-    --bg:          #09090f;
-    --bg-panel:    #0f0f18;
-    --bg-raised:   #16161f;
-    --bg-input:    #0c0c14;
-    --gold:        #ffd700;
-    --gold-dark:   #c8a415;
-    --gold-muted:  rgba(255, 215, 0, 0.18);
+    --bg: #09090f;
+    --bg-panel: #0f0f18;
+    --bg-raised: #16161f;
+    --bg-input: #0c0c14;
+    --gold: #ffd700;
+    --gold-dark: #c8a415;
+    --gold-muted: rgba(255, 215, 0, 0.18);
     --gold-border: rgba(255, 215, 0, 0.25);
-    --green:       #00ff96;
+    --green: #00ff96;
     --green-muted: rgba(0, 255, 150, 0.12);
-    --red:         #ff5555;
-    --text:        #e2ceaa;
-    --text-muted:  #6b6050;
-    --text-dim:    #9a8870;
-    --border:      rgba(255, 255, 255, 0.06);
-    --radius:      6px;
+    --red: #ff5555;
+    --text: #e2ceaa;
+    --text-muted: #6b6050;
+    --text-dim: #9a8870;
+    --border: rgba(255, 255, 255, 0.06);
+    --radius: 6px;
   }
 
   /* ── Reset & base ───────────────────────────────────────────────────── */
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
 
   body {
     background: var(--bg);
@@ -198,12 +266,17 @@
     line-height: 1.6;
     min-height: 100vh;
     background-image:
-      radial-gradient(ellipse 80% 40% at 10% -10%, rgba(0,255,150,0.04) 0%, transparent 60%),
-      radial-gradient(ellipse 60% 50% at 90% 110%, rgba(255,215,0,0.05) 0%, transparent 60%);
+      radial-gradient(ellipse 80% 40% at 10% -10%, rgba(0, 255, 150, 0.04) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 90% 110%, rgba(255, 215, 0, 0.05) 0%, transparent 60%);
   }
 
-  a { color: var(--green); text-decoration: none; }
-  a:hover { text-decoration: underline; }
+  a {
+    color: var(--green);
+    text-decoration: none;
+  }
+  a:hover {
+    text-decoration: underline;
+  }
 
   /* ── Header ─────────────────────────────────────────────────────────── */
   header {
@@ -212,7 +285,7 @@
     gap: 14px;
     padding: 20px 48px;
     border-bottom: 1px solid var(--gold-border);
-    background: linear-gradient(180deg, rgba(255,215,0,0.03) 0%, transparent 100%);
+    background: linear-gradient(180deg, rgba(255, 215, 0, 0.03) 0%, transparent 100%);
   }
 
   .logo {
@@ -222,7 +295,9 @@
     letter-spacing: 0.04em;
     color: var(--text);
   }
-  .logo .easy { color: var(--green); }
+  .logo .easy {
+    color: var(--green);
+  }
 
   .logo-sep {
     width: 1px;
@@ -254,7 +329,10 @@
     color: var(--text-dim);
     transition: color 0.2s;
   }
-  .gh-link:hover { color: var(--text); text-decoration: none; }
+  .gh-link:hover {
+    color: var(--text);
+    text-decoration: none;
+  }
 
   /* ── Main layout ────────────────────────────────────────────────────── */
   main {
@@ -380,7 +458,7 @@
     justify-content: space-between;
     padding: 13px 20px;
     border-bottom: 1px solid var(--border);
-    background: linear-gradient(180deg, rgba(255,215,0,0.04) 0%, transparent 100%);
+    background: linear-gradient(180deg, rgba(255, 215, 0, 0.04) 0%, transparent 100%);
   }
 
   .panel-title {
@@ -395,9 +473,13 @@
     gap: 8px;
   }
 
-  .panel-title svg { opacity: 0.7; }
+  .panel-title svg {
+    opacity: 0.7;
+  }
 
-  .panel-body { padding: 20px; }
+  .panel-body {
+    padding: 20px;
+  }
 
   /* ── Textarea ───────────────────────────────────────────────────────── */
   textarea {
@@ -415,8 +497,12 @@
     min-height: 130px;
   }
 
-  textarea:focus { border-color: rgba(255, 215, 0, 0.4); }
-  textarea::placeholder { color: var(--text-muted); }
+  textarea:focus {
+    border-color: rgba(255, 215, 0, 0.4);
+  }
+  textarea::placeholder {
+    color: var(--text-muted);
+  }
   textarea[readonly] {
     color: var(--green);
     cursor: text;
@@ -457,7 +543,9 @@
     box-shadow: 0 4px 20px rgba(200, 164, 21, 0.4);
   }
 
-  .btn-extract:active:not(:disabled) { transform: translateY(0); }
+  .btn-extract:active:not(:disabled) {
+    transform: translateY(0);
+  }
 
   .btn-extract:disabled {
     opacity: 0.35;
@@ -474,7 +562,9 @@
     font-size: 11px;
   }
 
-  .btn-copy:hover { background: rgba(0, 255, 150, 0.2); }
+  .btn-copy:hover {
+    background: rgba(0, 255, 150, 0.2);
+  }
 
   .btn-copy.done {
     background: rgba(0, 255, 150, 0.2);
@@ -527,7 +617,9 @@
     white-space: nowrap;
   }
 
-  .stat-value.green { color: var(--green); }
+  .stat-value.green {
+    color: var(--green);
+  }
 
   /* ── Output row ─────────────────────────────────────────────────────── */
   .output-row {
@@ -611,9 +703,13 @@
     vertical-align: middle;
   }
 
-  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
 
-  tbody tr:hover td { background: rgba(255, 255, 255, 0.02); }
+  tbody tr:hover td {
+    background: rgba(255, 255, 255, 0.02);
+  }
 
   .td-rank {
     font-size: 11px;
@@ -644,7 +740,9 @@
     font-size: 13px;
   }
 
-  .td-source { font-size: 12px; }
+  .td-source {
+    font-size: 12px;
+  }
 
   /* ── URL input row ──────────────────────────────────────────────────── */
   .url-row {
@@ -667,8 +765,12 @@
     min-width: 0;
   }
 
-  .url-input:focus { border-color: rgba(255, 215, 0, 0.4); }
-  .url-input::placeholder { color: var(--text-muted); }
+  .url-input:focus {
+    border-color: rgba(255, 215, 0, 0.4);
+  }
+  .url-input::placeholder {
+    color: var(--text-muted);
+  }
 
   /* ── Manual fallback ────────────────────────────────────────────────── */
   .manual-fallback {
@@ -689,7 +791,9 @@
     transition: color 0.2s;
   }
 
-  .manual-fallback summary:hover { color: var(--text-dim); }
+  .manual-fallback summary:hover {
+    color: var(--text-dim);
+  }
 
   .manual-fallback summary::before {
     content: '›';
@@ -698,13 +802,19 @@
     display: inline-block;
   }
 
-  .manual-fallback[open] summary::before { transform: rotate(90deg); }
+  .manual-fallback[open] summary::before {
+    transform: rotate(90deg);
+  }
 
   /* ── Custom element ─────────────────────────────────────────────────── */
-  sim-extractor { display: block; }
+  sim-extractor {
+    display: block;
+  }
 
   /* ── Hidden ─────────────────────────────────────────────────────────── */
-  .hidden { display: none !important; }
+  .hidden {
+    display: none !important;
+  }
 
   /* ── Footer ─────────────────────────────────────────────────────────── */
   footer {
@@ -715,18 +825,38 @@
     font-size: 12px;
   }
 
-  footer a { color: var(--text-muted); }
-  footer a:hover { color: var(--text-dim); }
+  footer a {
+    color: var(--text-muted);
+  }
+  footer a:hover {
+    color: var(--text-dim);
+  }
 
-  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
 
   /* ── Responsive ─────────────────────────────────────────────────────── */
   @media (max-width: 640px) {
-    header { padding: 16px 20px; }
-    main { padding: 36px 16px 60px; }
-    .hero h1 { font-size: 26px; }
-    .steps { grid-template-columns: 1fr; }
-    .steps::before { display: none; }
-    .stats-row { grid-template-columns: repeat(2, 1fr); }
+    header {
+      padding: 16px 20px;
+    }
+    main {
+      padding: 36px 16px 60px;
+    }
+    .hero h1 {
+      font-size: 26px;
+    }
+    .steps {
+      grid-template-columns: 1fr;
+    }
+    .steps::before {
+      display: none;
+    }
+    .stats-row {
+      grid-template-columns: repeat(2, 1fr);
+    }
   }
 </style>

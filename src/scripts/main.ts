@@ -7,12 +7,22 @@ import {
   type ExtractOutput,
   type UpgradeResult,
 } from '../lib/extract';
+import { type RaidDifficultyValue } from '../lib/types';
 
 declare const WH: { tooltips?: { refreshLinks: () => void } };
 
 const EXTRACT_ICON = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>`;
 
-const DIFF_LABELS: Record<number, string> = { 0: 'LFR', 2: 'Normal', 4: 'Heroic', 6: 'Mythic' };
+const DIFF_LABELS: Record<RaidDifficultyValue, string> = {
+  0: 'LFR',
+  1: 'LFR',
+  2: 'Normal',
+  3: 'Normal',
+  4: 'Heroic',
+  5: 'Heroic',
+  6: 'Mythic',
+  7: 'Mythic',
+};
 
 function esc(str: string): string {
   return String(str)
@@ -22,9 +32,12 @@ function esc(str: string): string {
     .replace(/"/g, '&quot;');
 }
 
+function isError(e: unknown): e is Error {
+  return e instanceof Error;
+}
+
 class SimExtractor extends HTMLElement {
   private reportUrl!: HTMLInputElement;
-  private inputJson!: HTMLTextAreaElement;
   private extractBtn!: HTMLButtonElement;
   private outputPanel!: HTMLDivElement;
   private outputJson!: HTMLTextAreaElement;
@@ -32,22 +45,21 @@ class SimExtractor extends HTMLElement {
   private statsRow!: HTMLDivElement;
   private previewBody!: HTMLTableSectionElement;
   private copyBtn!: HTMLButtonElement;
-  private manualFallback!: HTMLDetailsElement;
 
   connectedCallback() {
-    this.reportUrl      = this.querySelector<HTMLInputElement>('[data-report-url]')!;
-    this.inputJson      = this.querySelector<HTMLTextAreaElement>('[data-input-json]')!;
-    this.extractBtn     = this.querySelector<HTMLButtonElement>('[data-extract-btn]')!;
-    this.outputPanel    = this.querySelector<HTMLDivElement>('[data-output-panel]')!;
-    this.outputJson     = this.querySelector<HTMLTextAreaElement>('[data-output-json]')!;
-    this.errorBox       = this.querySelector<HTMLDivElement>('[data-error-box]')!;
-    this.statsRow       = this.querySelector<HTMLDivElement>('[data-stats-row]')!;
-    this.previewBody    = this.querySelector<HTMLTableSectionElement>('[data-preview-body]')!;
-    this.copyBtn        = this.querySelector<HTMLButtonElement>('[data-copy-btn]')!;
-    this.manualFallback = this.querySelector<HTMLDetailsElement>('[data-manual-fallback]')!;
+    this.reportUrl = this.querySelector<HTMLInputElement>('[data-report-url]')!;
+    this.extractBtn = this.querySelector<HTMLButtonElement>('[data-extract-btn]')!;
+    this.outputPanel = this.querySelector<HTMLDivElement>('[data-output-panel]')!;
+    this.outputJson = this.querySelector<HTMLTextAreaElement>('[data-output-json]')!;
+    this.errorBox = this.querySelector<HTMLDivElement>('[data-error-box]')!;
+    this.statsRow = this.querySelector<HTMLDivElement>('[data-stats-row]')!;
+    this.previewBody = this.querySelector<HTMLTableSectionElement>('[data-preview-body]')!;
+    this.copyBtn = this.querySelector<HTMLButtonElement>('[data-copy-btn]')!;
 
     this.extractBtn.addEventListener('click', () => this.handleExtract());
-    this.reportUrl.addEventListener('keydown', (e) => { if (e.key === 'Enter') this.extractBtn.click(); });
+    this.reportUrl.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') this.extractBtn.click();
+    });
     this.copyBtn.addEventListener('click', () => this.handleCopy());
   }
 
@@ -86,13 +98,21 @@ class SimExtractor extends HTMLElement {
       </div>
     `;
 
-    this.previewBody.innerHTML = results.slice(0, 20).map((r: UpgradeResult, i: number) => {
-      const diff = r.dropLoc === 'Dungeon'
-        ? `M+${r.dropDifficulty}`
-        : (DIFF_LABELS[r.dropDifficulty ?? -1] || `Diff ${r.dropDifficulty}`);
-      const sourceLabel = r.sourceName ? `${esc(r.sourceName)} ${diff}` : `${esc(r.dropLoc)} ${diff}`;
-      const ilvlParam = r.ilvl ? `&ilvl=${r.ilvl}` : '';
-      return `
+    this.previewBody.innerHTML = results
+      .slice(0, 20)
+      .map((r: UpgradeResult, i: number) => {
+        const name = esc(r.sourceName ?? r.dropLoc);
+        let sourceLabel: string;
+        if (r.dropLoc === 'Dungeon' && r.dropDifficulty != null) {
+          sourceLabel = `${name} M+${r.dropDifficulty}`;
+        } else if (r.dropLoc === 'Raid' && r.dropDifficulty != null) {
+          sourceLabel =
+            `${name} ${DIFF_LABELS[r.dropDifficulty as RaidDifficultyValue] ?? ''}`.trim();
+        } else {
+          sourceLabel = name;
+        }
+        const ilvlParam = r.ilvl ? `&ilvl=${r.ilvl}` : '';
+        return `
         <tr>
           <td class="td-rank">${i + 1}</td>
           <td class="td-item"><a href="https://www.wowhead.com/item=${r.itemID}" data-wowhead="item=${r.itemID}${ilvlParam}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;">${r.itemID}</a></td>
@@ -101,7 +121,8 @@ class SimExtractor extends HTMLElement {
           <td class="td-source">${sourceLabel}</td>
           <td class="td-upgrade">+${r.percDiff.toFixed(3)}%</td>
         </tr>`;
-    }).join('');
+      })
+      .join('');
 
     this.outputPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
     if (typeof WH !== 'undefined' && WH.tooltips) WH.tooltips.refreshLinks();
@@ -110,70 +131,60 @@ class SimExtractor extends HTMLElement {
   private async handleExtract(): Promise<void> {
     this.errorBox.style.display = 'none';
 
-    const url  = this.reportUrl.value.trim();
-    const text = this.inputJson.value.trim();
+    const url = this.reportUrl.value.trim();
 
-    if (url) {
-      const source = detectSource(url);
-      if (!source) {
-        this.showError('URL not recognised. Paste a Raidbots or Questionably Epic report URL.');
-        return;
-      }
-
-      this.setExtracting(true);
-      try {
-        let json: string;
-        let output: ExtractOutput;
-
-        if (source === 'raidbots') {
-          const id = raidbotsReportId(url);
-          if (!id) throw new Error('Could not parse the report ID from that Raidbots URL.');
-          const response = await fetch(`https://www.raidbots.com/reports/${id}/data.json`);
-          if (!response.ok) throw new Error(`Raidbots returned ${response.status}. The report may be private or expired.`);
-          json   = await response.text();
-          output = extract(json);
-        } else {
-          const id = qeReportId(url);
-          if (!id) throw new Error('Could not parse the report ID from that Questionably Epic URL.');
-          const response = await fetch(`https://questionablyepic.com/api/getUpgradeReport.php?reportID=${id}`);
-          if (!response.ok) throw new Error(`Questionably Epic returned ${response.status}. The report may not exist.`);
-          json   = await response.text();
-          output = extractQE(json);
-        }
-
-        this.renderOutput(output);
-      } catch (e) {
-        if (e instanceof TypeError) {
-          this.showError('Could not fetch the report directly (network or CORS error). Use the manual paste option below instead.');
-          this.manualFallback.open = true;
-        } else {
-          this.showError((e as Error).message);
-        }
-      } finally {
-        this.setExtracting(false);
-      }
+    if (!url) {
+      this.showError('Paste a Raidbots or Questionably Epic report URL above.');
       return;
     }
 
-    if (!text) {
-      this.showError('Paste a Raidbots report URL above, or expand "Or paste JSON manually" below.');
+    const source = detectSource(url);
+    if (!source) {
+      this.showError('URL not recognised. Paste a Raidbots or Questionably Epic report URL.');
       return;
     }
 
     this.setExtracting(true);
-    // Defer to let the browser repaint before the heavy JSON.parse
-    setTimeout(() => {
-      try {
-        let parsed = JSON.parse(text);
-        if (typeof parsed === 'string') parsed = JSON.parse(parsed); // QE double-encoding
-        const output = parsed.sim ? extract(text) : extractQE(text);
-        this.renderOutput(output);
-      } catch (e) {
-        this.showError((e as Error).message);
-      } finally {
-        this.setExtracting(false);
+    try {
+      let json: string;
+      let output: ExtractOutput;
+
+      if (source === 'raidbots') {
+        const id = raidbotsReportId(url);
+        if (!id) throw new Error('Could not parse the report ID from that Raidbots URL.');
+        const response = await fetch(`https://www.raidbots.com/reports/${id}/data.json`);
+        if (!response.ok)
+          throw new Error(
+            `Raidbots returned ${response.status}. The report may be private or expired.`,
+          );
+        json = await response.text();
+        output = extract(json);
+      } else {
+        const id = qeReportId(url);
+        if (!id) throw new Error('Could not parse the report ID from that Questionably Epic URL.');
+        const response = await fetch(
+          `https://questionablyepic.com/api/getUpgradeReport.php?reportID=${id}`,
+        );
+        if (!response.ok)
+          throw new Error(
+            `Questionably Epic returned ${response.status}. The report may not exist.`,
+          );
+        json = await response.text();
+        output = extractQE(json);
       }
-    }, 16);
+
+      this.renderOutput(output);
+    } catch (e) {
+      if (e instanceof TypeError) {
+        this.showError(
+          'Could not fetch the report directly (network or CORS error). The report may be private or the site may be down.',
+        );
+      } else {
+        this.showError(isError(e) ? e.message : 'An unexpected error occurred.');
+      }
+    } finally {
+      this.setExtracting(false);
+    }
   }
 
   private handleCopy(): void {
