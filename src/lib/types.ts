@@ -71,6 +71,7 @@ interface ProfilesetResult {
 
 export interface RaidbotsReport {
   build_date: string;
+  timestamp?: number;
   sim: {
     players: RaidbotsPlayer[];
     profilesets: {
@@ -113,6 +114,14 @@ export interface CompactItem {
   sourceName?: string;
 }
 
+export interface SourceGroup {
+  sourceId: number;
+  sourceName: string | null;
+  timestamp: number; // Unix epoch seconds
+  dropLoc: DropLocation;
+  items: CompactItem[];
+}
+
 export interface RaidbotsCompact {
   type: 'raidbots';
   spec: string;
@@ -120,7 +129,7 @@ export interface RaidbotsCompact {
   date: string;
   contentType: DropLocation;
   ufSettings: Record<string, number | number[]>;
-  results: CompactItem[];
+  sources: SourceGroup[];
 }
 
 export interface QECompact extends QEReport {

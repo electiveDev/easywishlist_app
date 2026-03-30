@@ -1,4 +1,4 @@
-import { getSourceName } from './itemSource';
+import { getSourceId, getSourceName, getSourceNameById } from './itemSource';
 import type {
   DropLocation,
   ReportSource,
@@ -7,6 +7,7 @@ import type {
   QEItem,
   RaidbotsCompact,
   QECompact,
+  SourceGroup,
 } from './types';
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -161,6 +162,31 @@ export function extract(jsonText: string): ExtractOutput {
   if (maxKeyLevel > 0) ufSettings.dungeon = maxKeyLevel;
   if (raidDiffs.size > 0) ufSettings.raid = [...raidDiffs];
 
+  // Group items by source (dungeon/raid instance). Items whose source cannot be
+  // determined are grouped under sourceId 0.
+  const timestamp = Math.floor(Date.now() / 1000);
+  const groupMap = new Map<number, UpgradeResult[]>();
+  for (const r of results) {
+    const sid = getSourceId(r.itemID) ?? 0;
+    if (!groupMap.has(sid)) groupMap.set(sid, []);
+    groupMap.get(sid)!.push(r);
+  }
+
+  const sources: SourceGroup[] = [...groupMap.entries()].map(([sourceId, items]) => ({
+    sourceId,
+    sourceName: getSourceNameById(sourceId),
+    timestamp,
+    dropLoc: items[0].dropLoc,
+    items: items.map((r) => ({
+      item: r.itemID,
+      level: r.ilvl,
+      dropLoc: r.dropLoc,
+      dropDifficulty: r.dropDifficulty,
+      percDiff: Math.round(r.percDiff * 1000) / 1000,
+      ...(r.sourceName ? { sourceName: r.sourceName } : {}),
+    })),
+  }));
+
   const compact: RaidbotsCompact = {
     type: 'raidbots',
     spec,
@@ -168,17 +194,7 @@ export function extract(jsonText: string): ExtractOutput {
     date,
     contentType,
     ufSettings,
-    results: results.map((r) => {
-      const src = getSourceName(r.itemID);
-      return {
-        item: r.itemID,
-        level: r.ilvl,
-        dropLoc: r.dropLoc,
-        dropDifficulty: r.dropDifficulty,
-        percDiff: Math.round(r.percDiff * 1000) / 1000,
-        ...(src ? { sourceName: src } : {}),
-      };
-    }),
+    sources,
   };
 
   return { compact, results, baseline, spec, playerName };
