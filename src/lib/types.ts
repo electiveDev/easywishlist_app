@@ -132,6 +132,15 @@ export interface RaidbotsCompact {
   sources: SourceGroup[];
 }
 
-export interface QECompact extends QEReport {
-  results: (QEItem & { sourceName?: string })[];
+export interface QECompact {
+  type: 'qe';
+  id: string;
+  dateCreated: string;
+  playername: string;
+  realm: string;
+  spec: string;
+  contentType: string;
+  ufSettings: Record<string, number | number[]>;
+  gameType: string;
+  sources: SourceGroup[];
 }
