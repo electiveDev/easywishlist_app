@@ -31,3 +31,20 @@ export function getSourceName(itemID: number): string | null {
   if (src.i === -1) return DUNGEON_NAMES[src.e] ?? null;
   return RAID_NAMES[src.i] ?? null;
 }
+
+// Returns a stable numeric grouping key for an item:
+//   dungeons → dungeon encounter group ID (src.e)
+//   raids    → raid instance ID (src.i)
+//   seasonal M+ pool → -87
+export function getSourceId(itemID: number): number | null {
+  const src = ITEM_SOURCE[itemID];
+  if (!src) return null;
+  if (src.i === -87) return -87;
+  if (src.i === -1) return src.e;
+  return src.i;
+}
+
+export function getSourceNameById(sourceId: number): string | null {
+  if (sourceId === -87) return 'Mythic+';
+  return RAID_NAMES[sourceId] ?? DUNGEON_NAMES[sourceId] ?? null;
+}
