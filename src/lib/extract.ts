@@ -4,7 +4,6 @@ import type {
   ReportSource,
   RaidbotsReport,
   QEReport,
-  QEItem,
   RaidbotsCompact,
   QECompact,
   SourceGroup,
@@ -217,12 +216,41 @@ export function extractQE(rawText: string): ExtractOutput {
 
   if (rawResults.length === 0) throw new Error('No upgrades found in this QE report.');
 
-  const enriched: (QEItem & { sourceName?: string })[] = rawResults.map((r) => {
-    const src = getSourceName(r.item);
-    return src ? { ...r, sourceName: src } : { ...r };
-  });
+  const results: UpgradeResult[] = rawResults.map((r) => ({
+    itemID: r.item,
+    ilvl: r.level,
+    slot: null,
+    dropLoc: r.dropLoc as DropLocation,
+    dropDifficulty: r.dropDifficulty,
+    sourceName: getSourceName(r.item),
+    percDiff: r.percDiff,
+  }));
+
+  const timestamp = Math.floor(Date.now() / 1000);
+  const groupMap = new Map<number, UpgradeResult[]>();
+  for (const r of results) {
+    const sid = getSourceId(r.itemID) ?? 0;
+    if (!groupMap.has(sid)) groupMap.set(sid, []);
+    groupMap.get(sid)!.push(r);
+  }
+
+  const sources: SourceGroup[] = [...groupMap.entries()].map(([sourceId, items]) => ({
+    sourceId,
+    sourceName: getSourceNameById(sourceId),
+    timestamp,
+    dropLoc: items[0].dropLoc,
+    items: items.map((r) => ({
+      item: r.itemID,
+      level: r.ilvl,
+      dropLoc: r.dropLoc,
+      dropDifficulty: r.dropDifficulty,
+      percDiff: Math.round(r.percDiff * 1000) / 1000,
+      ...(r.sourceName ? { sourceName: r.sourceName } : {}),
+    })),
+  }));
 
   const compact: QECompact = {
+    type: 'qe',
     id: data.id,
     dateCreated: data.dateCreated,
     playername: data.playername,
@@ -231,18 +259,8 @@ export function extractQE(rawText: string): ExtractOutput {
     contentType: data.contentType,
     ufSettings: data.ufSettings,
     gameType: data.gameType ?? 'Retail',
-    results: enriched,
+    sources,
   };
-
-  const results: UpgradeResult[] = enriched.map((r) => ({
-    itemID: r.item,
-    ilvl: r.level,
-    slot: null,
-    dropLoc: r.dropLoc as DropLocation,
-    dropDifficulty: r.dropDifficulty,
-    sourceName: r.sourceName ?? null,
-    percDiff: r.percDiff,
-  }));
 
   return {
     compact,
