@@ -1,4 +1,4 @@
-import { getSourceId, getSourceName, getSourceNameById } from './itemSource';
+import { getSourceId, getSourceName, getSourceNameById, getBossName } from './itemSource';
 import type {
   DropLocation,
   ReportSource,
@@ -27,6 +27,7 @@ export interface UpgradeResult {
   dropDifficulty: number | null;
   percDiff: number;
   sourceName: string | null;
+  dropBoss: string | null;
 }
 
 export interface ExtractOutput {
@@ -53,6 +54,32 @@ export function raidbotsReportId(url: string): string | null {
 export function qeReportId(url: string): string | null {
   const m = url.match(/upgradereport\/([a-zA-Z0-9]+)/);
   return m ? m[1] : null;
+}
+
+// ── Raidbots boss lookup ──────────────────────────────────────────────────────
+// Builds itemId → bossName from simbot.meta.encounterItems × instanceLibrary.
+function buildRaidbotsBossMap(data: RaidbotsReport): Map<number, string> {
+  const map = new Map<number, string>();
+  const instanceLibrary = data.simbot?.meta?.instanceLibrary;
+  const encounterItems = data.simbot?.meta?.encounterItems;
+  if (!instanceLibrary || !encounterItems) return map;
+
+  const encounterNames = new Map<number, string>();
+  for (const inst of instanceLibrary) {
+    for (const enc of inst.encounters) {
+      encounterNames.set(enc.id, enc.name);
+    }
+  }
+
+  for (const item of encounterItems) {
+    const bossSource = item.sources.find((s) => s.instanceId > 0);
+    if (bossSource) {
+      const name = encounterNames.get(bossSource.encounterId);
+      if (name) map.set(item.id, name);
+    }
+  }
+
+  return map;
 }
 
 // ── Parse a profileset name string ──────────────────────────────────────────
@@ -115,6 +142,15 @@ export function extract(jsonText: string): ExtractOutput {
   const playerName = player.name || 'Unknown';
   const date = data.build_date || '';
 
+  const armoryLine = data.simbot?.input
+    ?.split('\n')
+    .find((l) => l.startsWith('armory='));
+  const realm = armoryLine
+    ? (armoryLine.split(',')[1] ?? '').replace(/^./, (c) => c.toUpperCase())
+    : '';
+
+  const bossMap = buildRaidbotsBossMap(data);
+
   let maxKeyLevel = 0;
   const raidDiffs = new Set<number>();
 
@@ -138,6 +174,7 @@ export function extract(jsonText: string): ExtractOutput {
         dropDifficulty,
         percDiff,
         sourceName: getSourceName(itemID),
+        dropBoss: bossMap.get(itemID) ?? null,
       };
     }
 
@@ -183,6 +220,7 @@ export function extract(jsonText: string): ExtractOutput {
       dropDifficulty: r.dropDifficulty,
       percDiff: Math.round(r.percDiff * 1000) / 1000,
       ...(r.sourceName ? { sourceName: r.sourceName } : {}),
+      ...(r.dropBoss ? { dropBoss: r.dropBoss } : {}),
     })),
   }));
 
@@ -190,6 +228,7 @@ export function extract(jsonText: string): ExtractOutput {
     type: 'raidbots',
     spec,
     playername: playerName,
+    realm,
     date,
     contentType,
     ufSettings,
@@ -223,6 +262,7 @@ export function extractQE(rawText: string): ExtractOutput {
     dropLoc: r.dropLoc as DropLocation,
     dropDifficulty: r.dropDifficulty,
     sourceName: getSourceName(r.item),
+    dropBoss: getBossName(r.item),
     percDiff: r.percDiff,
   }));
 
@@ -246,6 +286,7 @@ export function extractQE(rawText: string): ExtractOutput {
       dropDifficulty: r.dropDifficulty,
       percDiff: Math.round(r.percDiff * 1000) / 1000,
       ...(r.sourceName ? { sourceName: r.sourceName } : {}),
+      ...(r.dropBoss ? { dropBoss: r.dropBoss } : {}),
     })),
   }));
 

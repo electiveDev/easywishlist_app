@@ -1,3 +1,6 @@
+import { retailInstanceDB } from './instanceDB';
+import type { RaidInstanceEntry } from './types';
+
 // Item source lookup — maps itemID → { instanceId, encounterId }
 // Generated from equippable-items.json (raidbots.com/static/data/live/equippable-items.json)
 // i = instanceId (-1 = dungeon pool, -87 = seasonal M+ set gear), e = encounterId/dungeonId
@@ -47,4 +50,14 @@ export function getSourceId(itemID: number): number | null {
 export function getSourceNameById(sourceId: number): string | null {
   if (sourceId === -87) return 'Mythic+';
   return RAID_NAMES[sourceId] ?? DUNGEON_NAMES[sourceId] ?? null;
+}
+
+// Returns the boss name for an item using the static retailInstanceDB.
+// Only works for raid items (instanceId > 0); dungeon pool items return null.
+export function getBossName(itemID: number): string | null {
+  const src = ITEM_SOURCE[itemID];
+  if (!src || src.i <= 0) return null;
+  const inst = retailInstanceDB[src.i];
+  if (!inst) return null;
+  return (inst as RaidInstanceEntry).bosses?.[src.e] ?? null;
 }
