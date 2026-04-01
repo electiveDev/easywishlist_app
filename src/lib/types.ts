@@ -69,6 +69,21 @@ interface ProfilesetResult {
   mean: number;
 }
 
+interface SimbotEncounter {
+  id: number;
+  name: string;
+}
+
+interface SimbotInstance {
+  id: number;
+  encounters: SimbotEncounter[];
+}
+
+interface SimbotEncounterItem {
+  id: number;
+  sources: { instanceId: number; encounterId: number }[];
+}
+
 export interface RaidbotsReport {
   build_date: string;
   timestamp?: number;
@@ -76,6 +91,12 @@ export interface RaidbotsReport {
     players: RaidbotsPlayer[];
     profilesets: {
       results: ProfilesetResult[];
+    };
+  };
+  simbot?: {
+    meta?: {
+      instanceLibrary?: SimbotInstance[];
+      encounterItems?: SimbotEncounterItem[];
     };
   };
 }
@@ -112,6 +133,7 @@ export interface CompactItem {
   dropDifficulty: number | null;
   percDiff: number;
   sourceName?: string;
+  dropBoss?: string;
 }
 
 export interface SourceGroup {
