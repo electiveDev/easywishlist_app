@@ -142,6 +142,13 @@ export function extract(jsonText: string): ExtractOutput {
   const playerName = player.name || 'Unknown';
   const date = data.build_date || '';
 
+  const armoryLine = data.simbot?.input
+    ?.split('\n')
+    .find((l) => l.startsWith('armory='));
+  const realm = armoryLine
+    ? (armoryLine.split(',')[1] ?? '').replace(/^./, (c) => c.toUpperCase())
+    : '';
+
   const bossMap = buildRaidbotsBossMap(data);
 
   let maxKeyLevel = 0;
@@ -221,6 +228,7 @@ export function extract(jsonText: string): ExtractOutput {
     type: 'raidbots',
     spec,
     playername: playerName,
+    realm,
     date,
     contentType,
     ufSettings,

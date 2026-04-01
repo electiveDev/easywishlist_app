@@ -94,6 +94,7 @@ export interface RaidbotsReport {
     };
   };
   simbot?: {
+    input?: string;
     meta?: {
       instanceLibrary?: SimbotInstance[];
       encounterItems?: SimbotEncounterItem[];
@@ -148,6 +149,7 @@ export interface RaidbotsCompact {
   type: 'raidbots';
   spec: string;
   playername: string;
+  realm: string;
   date: string;
   contentType: DropLocation;
   ufSettings: Record<string, number | number[]>;
