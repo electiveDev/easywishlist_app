@@ -90,6 +90,7 @@ export interface RaidbotsReport {
   timestamp?: number;
   sim: {
     options?: { profileset_metric?: string };
+    statistics?: { raid_dps?: { mean: number } };
     players: RaidbotsPlayer[];
     profilesets: {
       results: ProfilesetResult[];
