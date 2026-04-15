@@ -89,6 +89,7 @@ export interface RaidbotsReport {
   build_date: string;
   timestamp?: number;
   sim: {
+    options?: { profileset_metric?: string };
     players: RaidbotsPlayer[];
     profilesets: {
       results: ProfilesetResult[];
