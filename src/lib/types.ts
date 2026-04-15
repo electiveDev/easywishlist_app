@@ -56,6 +56,7 @@ export interface DungeonInstanceEntry {
 
 interface RaidbotsCollectedData {
   dps: { mean: number };
+  raid_dps?: { mean: number };
 }
 
 interface RaidbotsPlayer {
