@@ -135,7 +135,8 @@ export function extract(jsonText: string): ExtractOutput {
     );
 
   const player = data.sim.players?.[0];
-  const baseline = player?.collected_data?.dps?.mean;
+  const collectedData = player?.collected_data;
+  const baseline = collectedData?.raid_dps?.mean ?? collectedData?.dps?.mean;
   if (!baseline) throw new Error('Could not find baseline DPS. The report may be incomplete.');
 
   const spec = player.specialization || 'Unknown';
